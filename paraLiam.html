@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Para Liam 🖤</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Noto+Serif:wght@400;700&family=Raleway:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            background-color: #030305;
+            color: #e0e0e0;
+            font-family: 'Raleway', sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+        }
+
+        /* Fondo dinámico de estrellas y luna */
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        #envelope-container {
+            perspective: 1500px;
+            cursor: pointer;
+            z-index: 10;
+            transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            width: 90%;
+            max-width: 340px;
+            height: 230px;
+            margin-top: -50px;
+        }
+
+        #envelope-container.open {
+            transform: translateY(50px) scale(1.05);
+        }
+
+        .envelope {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+        }
+
+        .envelope-body {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            z-index: 2;
+        }
+
+        .envelope-flap {
+            position: absolute;
+            top: 0;
+            width: 0; height: 0;
+            border-left: 170px solid transparent;
+            border-right: 170px solid transparent;
+            border-top: 120px solid #f0f0f0;
+            transform-origin: top;
+            transition: transform 0.4s 0.2s, border-top-color 0.4s 0.2s;
+            z-index: 3;
+            left: 0;
+        }
+
+        #envelope-container.open .envelope-flap {
+            transform: rotateX(180deg);
+            border-top-color: #ffffff;
+        }
+
+        .envelope-text {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            top: 50%;
+            transform: translateY(-50%);
+            font-family: 'Dancing Script', cursive;
+            font-size: 2rem;
+            color: #555;
+            z-index: 4;
+            text-shadow: 1px 1px 0px #fff;
+        }
+
+        .wax-seal {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 50px;
+            background: #8b0000;
+            border-radius: 50%;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+            z-index: 5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .wax-seal::after {
+            content: '❤️';
+            font-size: 1.3rem;
+        }
+
+        #letter {
+            position: absolute;
+            top: 10px;
+            left: 5%;
+            width: 90%;
+            height: 200px;
+            background: #fdfcf0;
+            padding: 25px;
+            border-radius: 4px;
+            z-index: 10;
+            box-shadow: 0 0 15px rgba(0,0,0,0.4);
+            opacity: 0;
+            transition: all 0.7s 0.4s ease-out;
+            overflow: hidden;
+            pointer-events: none;
+            border: 1px solid #e0dcca;
+        }
+
+        #letter::before {
+            content: '❦';
+            position: absolute;
+            top: 10px; left: 10px;
+            color: #8b0000;
+            opacity: 0.5;
+        }
+
+        #envelope-container.open #letter {
+            opacity: 1;
+            transform: translateY(-150px) scale(1);
+            height: auto;
+            max-height: 75vh;
+            pointer-events: auto;
+            overflow-y: auto;
+        }
+
+        .letter-content {
+            font-family: 'Noto Serif', serif;
+            color: #333;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .letter-content h2 {
+            font-family: 'Dancing Script', cursive;
+            color: #8b0000;
+            font-size: 2.2rem;
+            text-align: center;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+
+        .letter-content p {
+            margin-bottom: 12px;
+            text-align: justify;
+        }
+
+        .heart-beat {
+            text-align: center;
+            font-size: 2.5rem;
+            color: #e60000;
+            animation: heartbeat 1.2s infinite;
+            margin: 15px 0;
+            text-shadow: 0 0 10px rgba(230, 0, 0, 0.5);
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.18); }
+        }
+
+        .signature {
+            font-family: 'Dancing Script', cursive;
+            font-size: 1.6rem;
+            text-align: right;
+            margin-top: 15px;
+            color: #8b0000;
+        }
+
+        #letter::-webkit-scrollbar { width: 5px; }
+        #letter::-webkit-scrollbar-thumb { background-color: #ccc; border-radius: 3px; }
+    </style>
+</head>
+<body>
+
+    <!-- Fondo dinámico con Luna y Estrellas -->
+    <canvas id="canvas"></canvas>
+
+    <div id="envelope-container" onclick="openLetter()">
+        <div class="envelope">
+            <div class="envelope-flap"></div>
+            <div class="envelope-body">
+                <div class="envelope-text">Para Liam 🖤</div>
+                <div class="wax-seal"></div>
+            </div>
+        </div>
+
+        <div id="letter">
+            <div class="letter-content">
+                <h2>Para Liam</h2>
+                <p>Llevo un tiempo guardando esto en el pecho y hoy por fin quiero confesártelo de verdad...</p>
+                <p>Desde que te conocí me gustaste. Eres ese tipo de chico que pensé que nunca conocería en mi país, porque suelo ser un poco reservada con la gente de aquí... hasta que apareciste tú.</p>
+                <p>Eres tan perfecto para mí con tu linda personalidad. Físicamente me gusta todo de ti, tus errores, tú, tu alma entera. Con el tiempo que ha pasado y conociéndote mejor, entendiendo tus problemas y el porqué eres como eres, aun así me gustas y te amo. Me enamoré tal como eres.</p>
+                <p>Tenía miedo de que quizás amaras a otra persona (y si es así, espero que me lo digas jasjdja, no me molestaría, tendría que aceptarlo), pero tú en verdad me gustas mucho. Quiero intentarlo, darme la oportunidad de amar, volver a amar y darte todo lo mejor de mí, aunque a veces sienta que no es suficiente o que no soy la gran cosa... en verdad quiero hacerlo.</p>
+                <p>No importa si me rechazas, no quiero presionarte ni nada por el estilo, pero necesitaba confesártelo y pedírtelo formalmente.</p>
+                <p style="text-align: center; font-weight: bold; color: #8b0000; font-size: 1.05rem; margin-top: 15px;">
+                    ¿Quieres ser mi novio? ¿Me dejarías ser tu novia?
+                </p>
+                
+                <div class="heart-beat">❤️</div>
+                
+                <p style="text-align: center; font-style: italic; color: #666;">
+                    Espero tu respuesta... y seguro lo lees cuando estamos en llamada ahora mismo, así que respóndeme ahora mismo jasjdjjds.
+                </p>
+
+                <div class="signature">Te amo 🖤</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let stars = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Star {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 1.5;
+                this.alpha = Math.random();
+                this.speed = Math.random() * 0.02 + 0.005;
+            }
+            update() {
+                this.alpha += this.speed;
+                if (this.alpha > 1 || this.alpha < 0) {
+                    this.speed = -this.speed;
+                }
+            }
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = Math.abs(this.alpha);
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        function initStars() {
+            stars = [];
+            for (let i = 0; i < 100; i++) {
+                stars.push(new Star());
+            }
+        }
+        initStars();
+
+        function drawMoon() {
+            ctx.save();
+            let moonX = canvas.width - 80;
+            let moonY = 80;
+            let radius = 35;
+
+            let gradient = ctx.createRadialGradient(moonX, moonY, radius * 0.2, moonX, moonY, radius * 2.5);
+            gradient.addColorStop(0, 'rgba(255, 255, 230, 0.15)');
+            gradient.addColorStop(1, 'transparent');
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(moonX, moonY, radius * 2.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#f4f4e8';
+            ctx.beginPath();
+            ctx.arc(moonX, moonY, radius, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#030305';
+            ctx.beginPath();
+            ctx.arc(moonX + 12, moonY - 6, radius * 0.9, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawMoon();
+            stars.forEach(star => {
+                star.update();
+                star.draw();
+            });
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        function openLetter() {
+            const container = document.getElementById('envelope-container');
+            if (!container.classList.contains('open')) {
+                container.classList.add('open');
+            }
+        }
+    </script>
+</body>
+</html>
